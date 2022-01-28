@@ -7,10 +7,12 @@ const jwt = require('jsonwebtoken')
 
 
 router.post('/signup',(req,res,next)=>{
-    bcrypt.hash(req.body.password,10,(error,hash)=>{
+    bcrypt.hash(req.body.password,10,function(error,hash){
         if(error){
+            console.log(error)
             return res.status(500).json({
-                error:err
+                err:error
+                
             });            
         }else{
             const user = new User({
@@ -85,7 +87,6 @@ router.post('/login',(req,res,next) => {
 
 
 
-module.exports = router
 
 
 

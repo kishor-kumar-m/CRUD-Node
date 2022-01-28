@@ -1,9 +1,16 @@
 const Product = require('../models/product');
+const Order = require('../models/order');
+const mongoose =require('mongoose');
 
-
+ 
 exports.products_get= (req,res,next) =>{
-    Product.find()
-    .select('name price productImage')
+    const stats= Product.aggregate([{
+        $match : {price :{$gte:10} },
+        $group :{_id : null,
+            avgRating : {$avg : '$price'},
+            minPrice : {$min : '$price'}
+        }
+    }]) 
     .exec()
     .then(docs => {
         const response ={
@@ -11,7 +18,10 @@ exports.products_get= (req,res,next) =>{
             products: docs
 
         };
-    res.status(200).json(response);   
+    res.status(200).json(response,{
+        status : 'Success',
+        data : {stats}
+    });   
     })
     
     .catch(err =>{
@@ -86,10 +96,10 @@ exports.product_delete = (req,res,next) =>{
 
 exports.product_update = (req,res,next) =>{
     const id = req.params.productId;
-    const updateOps = {};
-    for(const ops of req.body){
-        updateOps[ops.propName] = ops.value;
-    }
+    // const updateOps = {};
+    // // for(const ops of req.body){
+    //     updateOps[ops.propName] = ops.value;
+    // }
     Product.update({_id : id},{$set: updateOps})
     .exec()
     .then(result => {
